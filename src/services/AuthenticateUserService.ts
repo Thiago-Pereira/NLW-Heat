@@ -13,14 +13,14 @@ import { sign } from "jsonwebtoken";
  */
 
 interface IAccessTokenResponse {
-    access_token: string
+    access_token: string,
 }
 
 interface IUserResponse {
     avatar_url: string,
     login: string,
     id: number,
-    name: string
+    name: string,
 }
 
 class AuthenticateUserService {
@@ -34,22 +34,22 @@ class AuthenticateUserService {
                 code,
             },
             headers: {
-                "Accept": "application/json"
-            }
+                "Accept": "application/json",
+            },
         });
 
         const response = await axios.get<IUserResponse>("https://api.github.com/user", {
             headers: {
-                Authorization: `Bearer ${accessTokenResponse.access_token}`
-            }
+                Authorization: `Bearer ${accessTokenResponse.access_token}`,
+            },
         });
 
         const { login, id, avatar_url, name } = response.data;
 
         let user = await prismaClient.user.findFirst({
             where: {
-                github_id: id
-            }
+                github_id: id,
+            },
         });
 
         if(!user) {
@@ -58,8 +58,8 @@ class AuthenticateUserService {
                     github_id: id,
                     login,
                     avatar_url,
-                    name
-                }
+                    name,
+                },
             });
         }
 
@@ -68,14 +68,14 @@ class AuthenticateUserService {
                 user: {
                     name: user.name,
                     avatar_url: user.avatar_url,
-                    id: user.id
-                }
+                    id: user.id,
+                },
             },
             process.env.JWT_SECRET,
             {
                 subject: user.id,
-                expiresIn: "1d"
-            }
+                expiresIn: "1d",
+            },
         );
 
         return { token, user };
